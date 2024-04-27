@@ -1,0 +1,50 @@
+library(randomForest)
+
+library(e1071)
+
+library(caret)
+
+getwd()
+
+mydata = read.csv('inputData.csv')
+
+mydata$diabetes <- factor(mydata$diabetes) 
+#To convert variables into factors in a data frame in R, you can use the factor() function.
+
+                                                   #    mydata$diabetes <- ifelse(mydata$diabetes == 0, "no", "true") # not nessesary to convert the num(numeric data) into char
+
+str(mydata)                    # the classification model will be built on the training dataset while
+                               # the accuracy of the model will be tested on the testing data set
+
+#spliting the data in training AND testing
+
+index = sample(2,nrow(mydata),replace = TRUE, prob = c(0.7,0.3))  #0.7(index 1) = 70% and 0.3(index 2) = 30% , prob = probability
+
+# create an object Training 
+Training = mydata[index==1,]
+
+# create an object Testing
+Testing = mydata[index==2,]
+
+# Random Forest Model
+RFM = randomForest(diabetes~.,data = Training)
+
+#evaluating model accuracy
+diabetes_pred = predict(RFM,Testing)
+
+#add the pred col into the testing data set
+Testing$diabetes_pred = diabetes_pred
+
+View(Testing)
+
+# building confusion matrix 
+CFM = table(Testing$diabetes,Testing$diabetes_pred)
+
+#view Confusion matrix
+CFM 
+
+#find the accuracy of the model
+classification_Accuracy_1 = sum(diag(CFM)/sum(CFM))
+
+#view Accuracy
+classification_Accuracy_1
